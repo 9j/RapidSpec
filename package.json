@@ -1,0 +1,60 @@
+{
+  "name": "rapidspec",
+  "version": "0.2.0",
+  "description": "Spec-driven development workflow with AI agents for Claude Code. Includes 18 specialized agents and checkpoint-based implementation.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "rapid": "./dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/9j/RapidSpec.git"
+  },
+  "homepage": "https://github.com/9j/RapidSpec",
+  "bugs": {
+    "url": "https://github.com/9j/RapidSpec/issues"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "keywords": [
+    "claude-code",
+    "rapidspec",
+    "spec-driven",
+    "workflow",
+    "ai-agents",
+    "checkpoint",
+    "linear",
+    "openspec"
+  ],
+  "author": "BAK Chanhee <bak@chanhee.kr>",
+  "license": "MIT",
+  "dependencies": {
+    "@linear/sdk": "^28.0.0",
+    "commander": "^12.0.0",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.1",
+    "inquirer": "^10.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "agents",
+    "commands",
+    "README.md",
+    "LICENSE"
+  ]
+}
