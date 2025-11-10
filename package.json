@@ -1,6 +1,6 @@
 {
   "name": "rapidspec",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Spec-driven development workflow with AI agents for Claude Code and Cursor IDE. Includes 18 specialized agents and checkpoint-based implementation.",
   "type": "module",
   "main": "dist/index.js",

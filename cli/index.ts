@@ -98,7 +98,7 @@ const packageRoot = resolve(__dirname, "..");
 program
   .name("rapid")
   .description("RapidSpec - Spec-driven development for Claude Code")
-  .version("0.2.7");
+  .version("0.2.8");
 
 program
   .command("init [path]")
@@ -233,18 +233,6 @@ program
       console.log(chalk.gray(`  Copied ${templateFiles.length} template(s)`));
     } else {
       console.log(chalk.yellow("  ⚠️  No templates directory found"));
-    }
-
-    // Create .gitignore entry for rapidspec/changes if needed
-    const gitignorePath = join(cwd, ".gitignore");
-    if (existsSync(gitignorePath)) {
-      const gitignoreContent = readFileSync(gitignorePath, "utf-8");
-      if (!gitignoreContent.includes("rapidspec/changes/")) {
-        const entry =
-          "\n# RapidSpec working directory\nrapidspec/changes/*\n!rapidspec/changes/.gitkeep\n";
-        writeFileSync(gitignorePath, gitignoreContent + entry);
-        console.log(chalk.green("  ✓ Updated .gitignore"));
-      }
     }
 
     // Configure Cursor MCP for sub-agents
