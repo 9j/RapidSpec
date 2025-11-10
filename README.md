@@ -1,6 +1,6 @@
 # RapidSpec
 
-Spec-driven development workflow for Claude Code with AI agents.
+Spec-driven development workflow with AI agents for Claude Code and Cursor IDE.
 
 ## What is RapidSpec?
 
@@ -29,8 +29,9 @@ This will:
 - Copy 7 commands to `.claude/commands/`
 - Copy 7 templates to `.rapidspec/templates/`
 - Generate `CLAUDE.md` and `rapidspec/AGENTS.md`
+- Configure `.cursor/mcp.json` for Cursor IDE integration
 
-This enables `/rapid:*` slash commands in Claude Code.
+This enables `/rapid:*` slash commands in Claude Code and Cursor IDE.
 
 ## Quick Start
 
@@ -52,6 +53,35 @@ This automatically:
 - Documents RapidSpec workflow, slash commands, and agents
 - Follows [agents.md convention](https://agents.md/) for tool-agnostic discovery
 - Compatible with Claude Code, Amp, Jules, Gemini CLI, and other AI tools
+
+## IDE Support
+
+### Claude Code
+Native support via `.claude/agents/` and `.claude/commands/`:
+- **Agents**: `@agent-code-verifier`, `@agent-security-auditor`, etc.
+- **Slash Commands**: `/rapid:proposal`, `/rapid:apply`, `/rapid:review`, etc.
+
+### Cursor IDE
+Agents available via [sub-agents-mcp](https://github.com/shinpr/sub-agents-mcp):
+- **Setup**: `rapid init` automatically configures `.cursor/mcp.json`
+- **Usage**: Reload Cursor, then use `@agent-*` in chat (e.g., `@agent-code-verifier`)
+- **Slash Commands**: `/rapid:*` commands work in Cursor 2.0+
+
+**Manual Configuration (if needed):**
+```json
+{
+  "mcpServers": {
+    "sub-agents": {
+      "command": "npx",
+      "args": ["-y", "sub-agents-mcp"],
+      "env": {
+        "AGENTS_DIR": "/absolute/path/to/.claude/agents",
+        "AGENT_TYPE": "cursor"
+      }
+    }
+  }
+}
+```
 
 ### 1. Create your first spec
 

@@ -98,7 +98,7 @@ const packageRoot = resolve(__dirname, "..");
 program
   .name("rapid")
   .description("RapidSpec - Spec-driven development for Claude Code")
-  .version("0.2.5");
+  .version("0.2.6");
 
 program
   .command("init [path]")
@@ -247,15 +247,65 @@ program
       }
     }
 
+    // Configure Cursor MCP for sub-agents
+    console.log(chalk.bold("\nConfiguring Cursor IDE integration:"));
+    const cursorDir = join(cwd, ".cursor");
+    const mcpJsonPath = join(cursorDir, "mcp.json");
+
+    // Create .cursor directory if it doesn't exist
+    if (!existsSync(cursorDir)) {
+      mkdirSync(cursorDir, { recursive: true });
+    }
+
+    // Prepare sub-agents MCP configuration
+    const agentsAbsolutePath = resolve(cwd, ".claude", "agents");
+    const subAgentsConfig = {
+      command: "npx",
+      args: ["-y", "sub-agents-mcp"],
+      env: {
+        AGENTS_DIR: agentsAbsolutePath,
+        AGENT_TYPE: "cursor"
+      }
+    };
+
+    // Read or create mcp.json
+    let mcpConfig: any = { mcpServers: {} };
+    if (existsSync(mcpJsonPath)) {
+      try {
+        const mcpContent = readFileSync(mcpJsonPath, "utf-8");
+        mcpConfig = JSON.parse(mcpContent);
+        if (!mcpConfig.mcpServers) {
+          mcpConfig.mcpServers = {};
+        }
+      } catch (error) {
+        console.log(chalk.yellow("  ⚠️  Invalid mcp.json, creating new one"));
+        mcpConfig = { mcpServers: {} };
+      }
+    }
+
+    // Add sub-agents configuration
+    mcpConfig.mcpServers["sub-agents"] = subAgentsConfig;
+
+    // Write mcp.json
+    writeFileSync(mcpJsonPath, JSON.stringify(mcpConfig, null, 2) + "\n", "utf-8");
+    console.log(chalk.green("  ✓ .cursor/mcp.json configured"));
+    console.log(chalk.gray(`    AGENTS_DIR: ${agentsAbsolutePath}`));
+    console.log(chalk.gray("    AGENT_TYPE: cursor"));
+
     // Success message
     console.log(chalk.green.bold("\n✓ RapidSpec initialized successfully!\n"));
 
     console.log(chalk.bold("Next steps:\n"));
-    console.log("1. Start using RapidSpec with slash commands in Claude Code:");
-    console.log(chalk.gray("   /rapid:proposal <name>  # Create a new spec"));
-    console.log(chalk.gray("   /rapid:apply <name>     # Implement a spec"));
-    console.log(chalk.gray("   /rapid:validate <name>  # Review a spec"));
-    console.log(chalk.gray("   /rapid:archive <name>   # Archive a spec\n"));
+    console.log("1. Start using RapidSpec:");
+    console.log(chalk.bold("   Claude Code:"));
+    console.log(chalk.gray("     /rapid:proposal <name>  # Create a new spec"));
+    console.log(chalk.gray("     /rapid:apply <name>     # Implement a spec"));
+    console.log(chalk.gray("     /rapid:validate <name>  # Review a spec"));
+    console.log(chalk.gray("     /rapid:archive <name>   # Archive a spec"));
+    console.log(chalk.bold("   Cursor IDE:"));
+    console.log(chalk.gray("     Reload Cursor to load RapidSpec agents via MCP"));
+    console.log(chalk.gray("     Use @agent-* in chat (e.g., @agent-code-verifier)"));
+    console.log(chalk.gray("     Commands: /rapid:* slash commands work in Cursor 2.0\n"));
 
     console.log("2. Or use CLI commands directly:");
     console.log(
