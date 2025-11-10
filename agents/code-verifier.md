@@ -12,9 +12,9 @@ Prevent "imaginary code" by verifying all code references against actual files.
 ## When to Run
 
 **Automatically triggered:**
-- During proposal phase (before suggesting changes)
-- During implementation phase (before applying changes)
-- During validation checks
+- During `/rapid:proposal` (before suggesting changes)
+- During `/rapid:apply` (before implementing)
+- During `/rapid:validate` (validation check)
 
 **Manual trigger:**
 ```
