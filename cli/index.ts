@@ -98,7 +98,7 @@ const packageRoot = resolve(__dirname, "..");
 program
   .name("rapid")
   .description("RapidSpec - Spec-driven development for Claude Code")
-  .version("0.2.3");
+  .version("0.2.4");
 
 program
   .command("init [path]")
@@ -222,7 +222,7 @@ program
 
     if (existsSync(templatesSrcDir)) {
       const templateFiles = readdirSync(templatesSrcDir).filter((f: string) =>
-        f.endsWith(".md"),
+        f.endsWith(".md") && f !== "AGENTS.md" && f !== "CLAUDE.md",
       );
       for (const file of templateFiles) {
         const srcPath = join(templatesSrcDir, file);
