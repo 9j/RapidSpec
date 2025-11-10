@@ -13,7 +13,7 @@ Review implementation progress, update tasks.md, and prepare for commit.
 
 **Automatically:**
 - After each major implementation checkpoint
-- Before `/rapid:archive`
+- Before archiving changes
 - When user says "update tasks" or "ready to commit"
 
 **Manual:**

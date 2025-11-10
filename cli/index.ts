@@ -110,6 +110,7 @@ program
       '.claude',
       '.claude/agents',
       '.claude/commands',
+      '.claude/commands/rapidspec',
     ];
 
     for (const dir of dirs) {
@@ -167,7 +168,7 @@ program
     // Copy commands
     console.log(chalk.bold('\nCopying commands:'));
     const commandsSrcDir = join(packageRoot, 'commands');
-    const commandsDestDir = join(cwd, '.claude', 'commands');
+    const commandsDestDir = join(cwd, '.claude', 'commands', 'rapidspec');
 
     if (existsSync(commandsSrcDir)) {
       const commandFiles = readdirSync(commandsSrcDir).filter((f: string) => f.endsWith('.md'));
@@ -175,7 +176,7 @@ program
         const srcPath = join(commandsSrcDir, file);
         const destPath = join(commandsDestDir, file);
         copyFileSync(srcPath, destPath);
-        console.log(chalk.green(`  ✓ .claude/commands/${file}`));
+        console.log(chalk.green(`  ✓ .claude/commands/rapidspec/${file}`));
       }
       console.log(chalk.gray(`  Copied ${commandFiles.length} command(s)`));
     } else {
