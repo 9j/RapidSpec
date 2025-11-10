@@ -61,10 +61,13 @@ Using slash commands in Claude Code:
 ```
 
 AI will:
-1. Check existing code (prevent "imaginary code")
-2. Research best practices (Perplexity + reference repos)
-3. Analyze git history
-4. Present 2-3 implementation options
+1. Investigate codebase (prevent "imaginary code")
+   - Read actual files and find existing patterns
+   - Analyze git history
+2. Research best practices
+   - Web search for latest patterns
+   - Check framework documentation
+3. Present 2-3 implementation options with trade-offs
 
 ### 2. Implement the spec
 
@@ -132,42 +135,43 @@ The `rapid validate` CLI command performs **structure validation**:
 - ✓ Checks tasks format (checkbox syntax)
 - ✓ Fast and lightweight
 
-For **comprehensive AI-powered reviews**, use the slash command in Claude Code:
+For **comprehensive AI-powered implementation reviews**, use the slash command in Claude Code:
 ```
-/rapid:validate add-authentication
+/rapid:review add-authentication
 ```
 
-This runs all agent reviews:
-- Code verification (prevents imaginary code)
-- Security audit (RLS, OWASP)
-- Architecture review (Next.js, database, etc.)
-- Test coverage analysis
-- Performance checks
+This runs core + conditional agent reviews:
+- @agent-code-verifier: Verify implementation (prevents imaginary code)
+- @agent-security-auditor: Security audit (RLS, OWASP)
+- @agent-nextjs-architecture-expert: Architecture review (if Next.js changes)
+- @agent-database-architect: Database safety (if DB changes)
+- @agent-test-automator: Test coverage analysis (if user-facing features)
 
 ## Agents
 
-RapidSpec includes specialized review agents:
+RapidSpec includes specialized agents for different workflow stages:
 
-### Core Agents (Always Run)
-- **@agent-code-verifier** - Prevents "imaginary code" by verifying actual files
+### Investigation Agents (Proposal Stage)
+- **@agent-git-history-analyzer** - Code evolution and decision analysis
+- **@agent-pattern-recognition-specialist** - Find existing patterns in codebase
+- **@agent-best-practices-researcher** - External standards research via web search
+- **@agent-framework-docs-researcher** - Library documentation and source code
+
+### Core Review Agents (Always Run in Review/Validate)
+- **@agent-code-verifier** - Verifies implementation against actual files (prevents "imaginary code")
 - **@agent-security-auditor** - Checks RLS, auth, OWASP compliance
 
-### Architecture Experts
+### Conditional Review Agents (Based on Changes)
 - **@agent-nextjs-architecture-expert** - Next.js 16 best practices, Server/Client Components
 - **@agent-database-architect** - Migration safety, RLS, N+1 queries, indexes
 - **@agent-test-automator** - E2E test coverage and generation
-
-### Code Quality
 - **@agent-code-reviewer** - Type safety, patterns, performance, error handling
-- **@agent-task-updater** - Reviews implementation, updates tasks.md, prepares commits
 
-### Research Agents
-- **@agent-best-practices-researcher** - External standards research via web search
-- **@agent-framework-docs-researcher** - Library documentation and source code
-- **@agent-git-history-analyzer** - Code evolution and decision analysis
+### Workflow Agents
+- **@agent-task-updater** - Reviews implementation, updates tasks.md, prepares commits (used in `/rapid:commit`)
 - **@agent-pr-comment-resolver** - PR comment resolution
 
-These run automatically during `/rapid:validate` and `/rapid:apply`.
+Investigation agents run during `/rapid:proposal`, review agents during `/rapid:review` and `/rapid:validate`.
 
 ## Linear Integration
 
@@ -207,15 +211,16 @@ This is useful for PM-driven workflows where issues are created first, then impl
 You: "/rapid:proposal add-smart-link-duplicate-prevention"
 
 AI automatically:
-1. 📖 Investigation Phase
-   - Reads actual code (no "imaginary code")
-   - Analyzes git history
+1. 📖 Investigation Phase (runs in parallel)
+   - Reads actual codebase (no "imaginary code")
+   - @agent-git-history-analyzer: Analyzes git history
+   - @agent-pattern-recognition-specialist: Finds existing patterns
    - Understands why current behavior exists
 
-2. 🔬 Research Phase
-   - Searches best practices (web search)
+2. 🔬 Research Phase (runs in parallel)
+   - @agent-best-practices-researcher: Searches best practices (web search)
+   - @agent-framework-docs-researcher: Checks framework documentation
    - Analyzes reference repositories
-   - Checks framework documentation
 
 3. 💡 Options Phase
    - Presents 2-3 implementation approaches
@@ -278,28 +283,30 @@ Next steps:
 ```
 You: "/rapid:review add-smart-link-duplicate-prevention"
 
-AI runs all agent reviews:
+AI runs core + conditional agent reviews:
 
-✅ Code Verification
+Core Agents (always run):
+✅ Code Verification (@agent-code-verifier)
   ✓ All file references verified
   ✓ No imaginary code
   ✓ Diffs shown for all changes
 
-✅ Security Audit
+✅ Security Audit (@agent-security-auditor)
   ✓ RLS enabled on smart_links table
   ✓ Policies use has_role() function
   ✓ Input validation present
 
-⚠️  Architecture Review
+Conditional Agents (based on changes):
+⚠️  Architecture Review (@agent-nextjs-architecture-expert)
   ✓ Server Components used appropriately
   ⚠️  Consider adding loading state
 
-✅ Database Review
+✅ Database Review (@agent-database-architect)
   ✓ Migration non-blocking
   ✓ Indexes on foreign keys
   ✓ Rollback script provided
 
-⚠️  Test Coverage
+⚠️  Test Coverage (@agent-test-automator)
   ✓ E2E test present
   ✓ Unit tests present
   ⚠️  Missing edge case: concurrent creation
@@ -373,34 +380,29 @@ AI:
 ```
 You: "/rapid:validate add-smart-link-duplicate-prevention"
 
-AI runs all agent reviews:
+AI validates structure:
 
-✅ Code Verification
-  ✓ All file references verified
-  ✓ No imaginary code
-  ✓ Diffs shown for all changes
+✅ Structure Validation
+  ✓ proposal.md exists with required sections
+  ✓ tasks.md exists with proper format
+  ✓ spec deltas found in specs/smart-links/spec.md
 
-✅ Security Audit
-  ✓ RLS enabled on smart_links table
-  ✓ Policies use has_role() function
-  ✓ Input validation present
+✅ Format Validation
+  ✓ Proposal has Why, What Changes, Impact sections
+  ✓ Tasks use proper checkbox format
+  ✓ Spec deltas use ADDED/MODIFIED/REMOVED headers
 
-⚠️  Architecture Review
-  ✓ Server Components used appropriately
-  ⚠️  Consider adding loading state
+✅ Content Validation
+  ✓ File references match actual files
+  ✓ Tasks align with proposal
+  ✓ Spec deltas match proposed changes
 
-✅ Database Review
-  ✓ Migration non-blocking
-  ✓ Indexes on foreign keys
-  ✓ Rollback script provided
+Overall: PASSED
 
-⚠️  Test Coverage
-  ✓ E2E test present
-  ✓ Unit tests present
-  ⚠️  Missing edge case: concurrent creation
-
-Overall: PASSED (2 warnings - recommended fixes)
+Next: /rapid:apply add-smart-link-duplicate-prevention
 ```
+
+For comprehensive agent reviews, use `/rapid:review` instead.
 
 ### 6. Archive Completion (`/rapid:archive`)
 
@@ -429,11 +431,12 @@ Done! 🎉
 ┌─────────────────────────────────────────────────────────────┐
 │                     /rapid:proposal                          │
 ├─────────────────────────────────────────────────────────────┤
-│ 1. Investigation (auto)                                      │
-│    - @agent-code-verifier: Read actual files                │
+│ 1. Investigation (auto - runs in parallel)                  │
+│    - Read actual codebase (prevent "imaginary code")        │
 │    - @agent-git-history-analyzer: Understand history        │
+│    - @agent-pattern-recognition-specialist: Find patterns   │
 │                                                              │
-│ 2. Research (auto)                                           │
+│ 2. Research (auto - runs in parallel)                       │
 │    - @agent-best-practices-researcher: Web + docs           │
 │    - @agent-framework-docs-researcher: Library docs         │
 │                                                              │
@@ -466,9 +469,11 @@ Done! 🎉
 ┌─────────────────────────────────────────────────────────────┐
 │                    /rapid:review (optional)                 │
 ├─────────────────────────────────────────────────────────────┤
-│ Comprehensive agent reviews:                                 │
-│   - @agent-code-verifier: Prevents imaginary code           │
+│ Core reviews (always run in parallel):                      │
+│   - @agent-code-verifier: Verify implementation             │
 │   - @agent-security-auditor: RLS, auth, OWASP              │
+│                                                              │
+│ Conditional reviews (based on changes):                     │
 │   - @agent-code-reviewer: Quality, types, patterns         │
 │   - @agent-nextjs-architecture-expert: Next.js patterns    │
 │   - @agent-database-architect: Migration safety, indexes   │
@@ -495,13 +500,17 @@ Done! 🎉
 ┌─────────────────────────────────────────────────────────────┐
 │                    /rapid:validate (optional)               │
 ├─────────────────────────────────────────────────────────────┤
-│ Structure validation only:                                   │
+│ Structure validation (always):                              │
 │   - Required files exist (proposal.md, tasks.md)            │
 │   - Proposal format (sections present)                      │
 │   - Task checkbox syntax                                     │
 │                                                              │
+│ Agent reviews (optional, with --agents flag):               │
+│   - @agent-code-verifier: Verify no imaginary code          │
+│   - @agent-security-auditor: Check security implications    │
+│                                                              │
 │ → Structure validation report                               │
-│ Note: For comprehensive review, use /rapid:review           │
+│ Note: For post-implementation review, use /rapid:review     │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐

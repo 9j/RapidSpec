@@ -33,9 +33,11 @@ All file references must be verified with Read, Grep, or Git commands.
 
 Run these agents in parallel at the same time:
 
-- Task code-verifier(feature_description, affected_files)
+Investigation agents:
 - Task git-history-analyzer(affected_files)
 - Task pattern-recognition-specialist(affected_files)
+
+Research agents:
 - Task best-practices-researcher(feature_description, technology_stack)
 - Task framework-docs-researcher(detected_framework)
 
@@ -213,10 +215,14 @@ Option 1 because: [evidence-based reasoning from agent findings]
 - [ ] [specific task]
 **Checkpoint:** User can test here
 
-## 2. Validation
-- [ ] @agent-code-verifier passed
-- [ ] @agent-security-auditor passed
+## 2. Testing
 - [ ] E2E tests added (if user-facing)
+- [ ] Unit tests added (if business logic)
+
+## 3. Review (run /rapid:review after implementation)
+- [ ] @agent-code-verifier: Verify implementation
+- [ ] @agent-security-auditor: Security audit
+- [ ] Fix any critical issues
 ```
 
 **`specs/<capability>/spec.md`** - OpenSpec deltas:
@@ -272,9 +278,13 @@ AI thinking:
 → Check git history for past decisions
 
 AI executes in parallel:
-→ Task code-verifier → Found @src/app/dashboard/smart-links/page.tsx:127
+
+Investigation:
+→ Read codebase → Found @src/app/dashboard/smart-links/page.tsx:127
 → Task git-history-analyzer → Found commit fd2db07 "allow duplicates for A/B testing"
 → Task pattern-recognition-specialist → Found similar validation pattern in @src/app/dashboard/projects
+
+Research:
 → Task best-practices-researcher → Found UX patterns for deduplication
 → Task framework-docs-researcher → Next.js 16 form validation patterns
 
@@ -282,8 +292,8 @@ AI synthesizes:
 ✓ Current code allows duplicates (verified at line 127)
 ✓ Past decision: duplicates were intentional for A/B testing
 ✓ Existing pattern: project creation already has duplicate check (should follow same pattern)
-✓ Pattern: midday.ai uses client + DB unique constraint
-✓ Next.js: Recommend server actions with zod validation
+✓ Research: midday.ai uses client + DB unique constraint
+✓ Framework: Next.js recommends server actions with zod validation
 
 AI presents:
 ### Option 1: Client + DB Unique Constraint ⭐
@@ -308,14 +318,18 @@ AI generates:
 User: "/rapid:proposal fix 409 token refresh error"
 
 AI executes in parallel:
-→ Task code-verifier → Read @src/lib/supabase/client.ts
+
+Investigation:
+→ Read @src/lib/supabase/client.ts → No mutex protection found
 → Task git-history-analyzer → No mutex implementations found in history
+
+Research:
 → Task best-practices-researcher → Supabase auth best practices
 → Task framework-docs-researcher → @supabase/ssr v0.5 changelog
 
 AI synthesizes:
-✓ Reproduced: Concurrent refresh → 409 (no mutex protection)
-✓ @supabase/ssr v0.5 has built-in mutex
+✓ Issue reproduced: Concurrent refresh → 409 (no mutex protection)
+✓ Framework update: @supabase/ssr v0.5 has built-in mutex
 ✓ Alternative: midday uses p-limit for older versions
 
 AI presents options and waits for choice
@@ -330,14 +344,18 @@ Bad: "I'll update the middleware to add token validation"
 → Never verified current token handling!
 ```
 
-✅ **Do: Verify first with agents, then propose**
+✅ **Do: Investigate first with agents, then propose**
 ```
-Good: "Running parallel verification...
-→ code-verifier: Read @src/middleware.ts:42 - Current auth logic
+Good: "Running parallel investigation and research...
+
+Investigation:
+→ Read @src/middleware.ts:42 - Current auth logic
 → git-history-analyzer: Refactored yesterday in commit abc123
+
+Research:
 → best-practices-researcher: Found Next.js 16 middleware patterns
 
-Based on verification, here are 3 options..."
+Based on investigation and research, here are 3 options..."
 ```
 
 ❌ **Don't: Research without context**
