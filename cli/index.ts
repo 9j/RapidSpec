@@ -98,7 +98,7 @@ const packageRoot = resolve(__dirname, "..");
 program
   .name("rapid")
   .description("RapidSpec - Spec-driven development for Claude Code")
-  .version("0.2.6");
+  .version("0.2.7");
 
 program
   .command("init [path]")
@@ -304,7 +304,7 @@ program
     console.log(chalk.gray("     /rapid:archive <name>   # Archive a spec"));
     console.log(chalk.bold("   Cursor IDE:"));
     console.log(chalk.gray("     Reload Cursor to load RapidSpec agents via MCP"));
-    console.log(chalk.gray("     Use @agent-* in chat (e.g., @agent-code-verifier)"));
+    console.log(chalk.gray("     Ask naturally: 'Use the code-verifier agent to...'"));
     console.log(chalk.gray("     Commands: /rapid:* slash commands work in Cursor 2.0\n"));
 
     console.log("2. Or use CLI commands directly:");

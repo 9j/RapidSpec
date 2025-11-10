@@ -64,8 +64,9 @@ Native support via `.claude/agents/` and `.claude/commands/`:
 ### Cursor IDE
 Agents available via [sub-agents-mcp](https://github.com/shinpr/sub-agents-mcp):
 - **Setup**: `rapid init` automatically configures `.cursor/mcp.json`
-- **Usage**: Reload Cursor, then use `@agent-*` in chat (e.g., `@agent-code-verifier`)
+- **Usage**: Reload Cursor, then ask naturally (e.g., "Use the code-verifier agent to check this file")
 - **Slash Commands**: `/rapid:*` commands work in Cursor 2.0+
+- **Note**: Unlike Claude Code, Cursor doesn't support `@agent-*` mentions—use natural language requests instead
 
 **Manual Configuration (if needed):**
 ```json
