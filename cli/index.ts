@@ -6,6 +6,60 @@ import { readFileSync, existsSync, mkdirSync, copyFileSync, writeFileSync, readd
 import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
+// Markers for managed blocks
+const RAPIDSPEC_MARKERS = {
+  start: '<!-- RAPIDSPEC:START -->',
+  end: '<!-- RAPIDSPEC:END -->'
+};
+
+// Update file with markers (OpenSpec pattern)
+function updateFileWithMarkers(filePath: string, content: string): void {
+  let existingContent = '';
+
+  if (existsSync(filePath)) {
+    existingContent = readFileSync(filePath, 'utf-8');
+
+    const startIndex = existingContent.indexOf(RAPIDSPEC_MARKERS.start);
+    const endIndex = existingContent.indexOf(RAPIDSPEC_MARKERS.end, startIndex + RAPIDSPEC_MARKERS.start.length);
+
+    if (startIndex !== -1 && endIndex !== -1) {
+      // Replace content between markers
+      const before = existingContent.substring(0, startIndex);
+      const after = existingContent.substring(endIndex + RAPIDSPEC_MARKERS.end.length);
+      existingContent = before + RAPIDSPEC_MARKERS.start + '\n' + content + '\n' + RAPIDSPEC_MARKERS.end + after;
+    } else if (startIndex === -1 && endIndex === -1) {
+      // Prepend to existing content
+      existingContent = RAPIDSPEC_MARKERS.start + '\n' + content + '\n' + RAPIDSPEC_MARKERS.end + '\n\n' + existingContent;
+    } else {
+      throw new Error(`Invalid marker state in ${filePath}`);
+    }
+  } else {
+    // New file
+    existingContent = RAPIDSPEC_MARKERS.start + '\n' + content + '\n' + RAPIDSPEC_MARKERS.end;
+  }
+
+  writeFileSync(filePath, existingContent, 'utf-8');
+}
+
+// Root AGENTS.md stub template
+const AGENTS_ROOT_STUB = `# RapidSpec Instructions
+
+These instructions are for AI assistants working in this project.
+
+Always open \`@/rapidspec/AGENTS.md\` when the request:
+- Mentions planning or proposals (words like proposal, spec, change, plan)
+- Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
+- Sounds ambiguous and you need the authoritative spec before coding
+
+Use \`@/rapidspec/AGENTS.md\` to learn:
+- How to create and apply change proposals
+- Spec format and conventions
+- Project structure and guidelines
+- Project constitution and development principles
+- Code quality standards and best practices
+
+Keep this managed block so 'rapid init' can refresh the instructions.`;
+
 const program = new Command();
 
 // Get the directory where this CLI is installed
@@ -71,23 +125,25 @@ program
     // Copy instruction files
     console.log(chalk.bold('\nCreating instruction files:'));
 
-    const templates = [
-      { src: 'CLAUDE.md', dest: 'CLAUDE.md' },
-      { src: 'AGENTS.md', dest: 'rapidspec/AGENTS.md' },
-    ];
+    // Root AGENTS.md (stub with markers)
+    const rootAgentsPath = join(cwd, 'AGENTS.md');
+    updateFileWithMarkers(rootAgentsPath, AGENTS_ROOT_STUB);
+    console.log(chalk.green(`  ✓ AGENTS.md (root stub)`));
 
-    for (const { src, dest } of templates) {
-      const srcPath = join(packageRoot, 'templates', src);
-      const destPath = join(cwd, dest);
+    // CLAUDE.md (if exists)
+    const claudeMdSrc = join(packageRoot, 'templates', 'CLAUDE.md');
+    if (existsSync(claudeMdSrc)) {
+      const claudeMdDest = join(cwd, 'CLAUDE.md');
+      copyFileSync(claudeMdSrc, claudeMdDest);
+      console.log(chalk.green(`  ✓ CLAUDE.md`));
+    }
 
-      if (!existsSync(srcPath)) {
-        console.log(chalk.red(`  ✗ Template not found: ${src}`));
-        console.log(chalk.gray(`    Looking in: ${srcPath}`));
-        continue;
-      }
-
-      copyFileSync(srcPath, destPath);
-      console.log(chalk.green(`  ✓ ${dest}`));
+    // rapidspec/AGENTS.md (detailed instructions)
+    const agentsMdSrc = join(packageRoot, 'templates', 'AGENTS.md');
+    if (existsSync(agentsMdSrc)) {
+      const agentsMdDest = join(cwd, 'rapidspec', 'AGENTS.md');
+      copyFileSync(agentsMdSrc, agentsMdDest);
+      console.log(chalk.green(`  ✓ rapidspec/AGENTS.md (detailed)`));
     }
 
     // Copy agents
