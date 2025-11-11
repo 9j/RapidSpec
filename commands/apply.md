@@ -11,7 +11,7 @@ argument-hint: <change-id>
 # Apply RapidSpec Implementation
 
 <command_purpose>
-Implement OpenSpec proposals step-by-step with checkpoint-based workflow.
+Implement RapidSpec proposals step-by-step with checkpoint-based workflow.
 Each task is testable and allows direction changes at any checkpoint.
 </command_purpose>
 
@@ -102,6 +102,85 @@ This provides context for implementation decisions and prevents "imaginary code"
 - [ ] Read `rapidspec/changes/<change-id>/design.md` - Architecture (if exists)
 - [ ] Read `rapidspec/changes/<change-id>/investigation.md` - Context (if exists)
 - [ ] List all tasks with current status
+
+### 1.5 Architecture Validation (Before Implementation)
+
+<thinking>
+Before starting implementation, validate architectural decisions one more time.
+This catches design issues early when changes are cheap, before any code is written.
+Provides concrete implementation guidance based on the proposal.
+</thinking>
+
+<critical_requirement>
+MUST run architecture agents before implementing first task.
+MUST validate design decisions align with proposal.
+Design feedback here prevents mid-implementation pivots that waste time.
+</critical_requirement>
+
+**Run design agents based on proposal content:**
+
+**If Database changes (check proposal.md for migrations, schema changes):**
+- Task database-architect(migrations, schema, proposal_context)
+  - Provide concrete implementation guidance
+  - Validate RLS policies before writing SQL
+  - Confirm index strategy matches query patterns
+  - Review migration safety (CONCURRENTLY, non-blocking)
+  - Check rollback plan exists
+
+**If Next.js/React changes (check proposal.md for components, routes):**
+- Task nextjs-architecture-expert(components, routes, proposal_context)
+  - Guide Server/Client Component decisions per file
+  - Review data fetching approach (fetch, use, parallel)
+  - Validate file structure and naming
+  - Check async params/searchParams usage
+  - Suggest loading and error boundaries
+
+**Architecture Validation Checklist:**
+
+After agents complete:
+- [ ] Implementation approach confirmed
+- [ ] Potential pitfalls identified
+- [ ] Concrete guidance received for complex tasks
+- [ ] Ready to start Task 1.1 with confidence
+
+**Example Architecture Validation:**
+
+```
+Reading proposal.md...
+✓ Chosen: Option 1 (Client + DB Unique Constraint)
+✓ Detected: Database changes + Next.js component changes
+
+Running architecture validation...
+
+@agent-database-architect:
+Reviewing migration plan...
+✓ Migration approach: CREATE UNIQUE INDEX CONCURRENTLY - correct
+💡 Concrete guidance:
+  1. Create index first (can run while app is live)
+  2. Add constraint second (requires index to exist)
+  3. Order matters: index → constraint, not constraint → index
+⚠️ Don't forget: Add IF NOT EXISTS for idempotency
+✓ RLS: Policy using has_role('user') - validated
+✓ Rollback: DROP INDEX CONCURRENTLY documented
+
+@agent-nextjs-architecture-expert:
+Reviewing component structure...
+✓ Server Component for SmartLinksPage - correct
+✓ Client Component for DuplicateToast - minimal, appropriate
+💡 Implementation guidance:
+  1. Create toast.tsx as "use client" first
+  2. Import into page.tsx (Server Component)
+  3. Pass error from Server Action as prop
+⚠️ Watch out: Don't use useFormStatus in Server Component
+✓ Loading: loading.tsx pattern suggested - add to tasks
+
+Ready to implement with guidance ✓
+```
+
+**When to skip:**
+- Skip if proposal already has detailed design review
+- Skip for minor changes (typo fixes, copy updates)
+- Skip if confident in straightforward implementation
 
 ### 2. Execute Tasks One by One (Checkpoint-Based)
 

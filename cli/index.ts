@@ -98,7 +98,7 @@ const packageRoot = resolve(__dirname, "..");
 program
   .name("rapid")
   .description("RapidSpec - Spec-driven development for Claude Code")
-  .version("0.2.8");
+  .version("0.3.0");
 
 program
   .command("init [path]")

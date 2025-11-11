@@ -131,11 +131,12 @@ Moves to `archive/YYYYMMDDhhmmss-[name]/` and updates specs.
 All commands follow `/rapid:*` pattern:
 
 ### Core Workflow
-- `/rapid:proposal [name]` - Create new spec proposal with research
-- `/rapid:apply [name]` - Implement spec step-by-step with checkpoints
-- `/rapid:review [name]` - Run comprehensive agent reviews
+- `/rapid:proposal [name]` - Create new spec proposal with research and design review
+- `/rapid:apply [name]` - Implement spec step-by-step with architecture validation and checkpoints
+- `/rapid:review [name]` - Run comprehensive code quality reviews
+- `/rapid:triage [name]` - Review findings one by one and add selected items to tasks
+- `/rapid:resolve-parallel [name]` - Resolve multiple tasks in parallel with dependency analysis
 - `/rapid:commit [name]` - Review changes, update tasks, and commit
-- `/rapid:validate [name]` - Validate spec structure (structure check only)
 - `/rapid:archive [name]` - Archive completed spec and update canonical specs
 
 ### Linear Integration
@@ -166,43 +167,44 @@ The `rapid validate` CLI command performs **structure validation**:
 - ✓ Checks tasks format (checkbox syntax)
 - ✓ Fast and lightweight
 
-For **comprehensive AI-powered implementation reviews**, use the slash command in Claude Code:
-```
-/rapid:review add-authentication
-```
-
-This runs core + conditional agent reviews:
-- @agent-code-verifier: Verify implementation (prevents imaginary code)
-- @agent-security-auditor: Security audit (RLS, OWASP)
-- @agent-nextjs-architecture-expert: Architecture review (if Next.js changes)
-- @agent-database-architect: Database safety (if DB changes)
-- @agent-test-automator: Test coverage analysis (if user-facing features)
+For **comprehensive AI-powered reviews**, use the slash commands in Claude Code:
+- **Design review** (before coding): `/rapid:proposal` includes design review with architecture agents
+- **Code quality review** (after coding): `/rapid:review` runs code verification and security audits
 
 ## Agents
 
 RapidSpec includes specialized agents for different workflow stages:
 
-### Investigation Agents (Proposal Stage)
+### Investigation Agents (Proposal - Research Phase)
+Run in parallel at the start of `/rapid:proposal`:
 - **@agent-git-history-analyzer** - Code evolution and decision analysis
 - **@agent-pattern-recognition-specialist** - Find existing patterns in codebase
 - **@agent-best-practices-researcher** - External standards research via web search
 - **@agent-framework-docs-researcher** - Library documentation and source code
 
-### Core Review Agents (Always Run in Review/Validate)
+### Design Review Agents (Proposal - After Option Selection)
+Run after user selects an option in `/rapid:proposal`:
+- **@agent-database-architect** - Schema design, migration safety, RLS policies, index strategy
+- **@agent-nextjs-architecture-expert** - Server/Client Component architecture, routing, data fetching
+
+Also run at the start of `/rapid:apply` for implementation guidance.
+
+### Code Review Agents (Review - After Implementation)
+Run during `/rapid:review` to verify implementation quality:
+
+**Core Agents (always run)**:
 - **@agent-code-verifier** - Verifies implementation against actual files (prevents "imaginary code")
 - **@agent-security-auditor** - Checks RLS, auth, OWASP compliance
 
-### Conditional Review Agents (Based on Changes)
-- **@agent-nextjs-architecture-expert** - Next.js 16 best practices, Server/Client Components
-- **@agent-database-architect** - Migration safety, RLS, N+1 queries, indexes
-- **@agent-test-automator** - E2E test coverage and generation
+**Conditional Agents (based on changes)**:
 - **@agent-code-reviewer** - Type safety, patterns, performance, error handling
+- **@agent-data-integrity-guardian** - Data consistency, constraint validation
+- **@agent-test-automator** - E2E test coverage and generation
+- **@agent-performance-oracle** - Performance analysis and optimization
 
 ### Workflow Agents
 - **@agent-task-updater** - Reviews implementation, updates tasks.md, prepares commits (used in `/rapid:commit`)
 - **@agent-pr-comment-resolver** - PR comment resolution
-
-Investigation agents run during `/rapid:proposal`, review agents during `/rapid:review` and `/rapid:validate`.
 
 ## Linear Integration
 
@@ -260,9 +262,14 @@ AI automatically:
 
 You: "1" (select option)
 
+AI runs Design Review:
+✓ @agent-database-architect: Validates schema, migration safety
+✓ @agent-nextjs-architecture-expert: Reviews component structure
+✓ Incorporates design feedback into proposal
+
 AI creates:
 ✓ rapidspec/changes/add-smart-link-duplicate-prevention/
-  - proposal.md (full spec with chosen approach)
+  - proposal.md (full spec with chosen approach + design review)
   - tasks.md (step-by-step implementation plan)
   - investigation.md (findings from code analysis)
   - research.md (best practices and references)
@@ -272,6 +279,11 @@ AI creates:
 
 ```
 You: "/rapid:apply add-smart-link-duplicate-prevention"
+
+AI runs Architecture Validation:
+✓ @agent-database-architect: Provides implementation guidance
+✓ @agent-nextjs-architecture-expert: Confirms component approach
+✓ Ready to implement with validated architecture
 
 AI implements step-by-step:
 
@@ -328,26 +340,142 @@ Core Agents (always run):
   ✓ Input validation present
 
 Conditional Agents (based on changes):
-⚠️  Architecture Review (@agent-nextjs-architecture-expert)
-  ✓ Server Components used appropriately
-  ⚠️  Consider adding loading state
+⚠️  Code Quality Review (@agent-code-reviewer)
+  ✓ Type safety maintained
+  ⚠️  Function complexity: Consider extracting helper
 
-✅ Database Review (@agent-database-architect)
+✅ Data Integrity (@agent-data-integrity-guardian)
   ✓ Migration non-blocking
   ✓ Indexes on foreign keys
-  ✓ Rollback script provided
+  ✓ Constraint validation present
 
 ⚠️  Test Coverage (@agent-test-automator)
   ✓ E2E test present
   ✓ Unit tests present
   ⚠️  Missing edge case: concurrent creation
 
-Overall: PASSED (2 warnings - recommended fixes)
+Overall: PASSED (3 warnings - recommended fixes)
 
-Fix warnings? (ㄱㄱ to fix, skip to ignore)
+Next: /rapid:triage to review findings individually
 ```
 
-### 4. Commit Changes (`/rapid:commit`)
+### 4. Triage Findings (`/rapid:triage`) - Optional
+
+```
+You: "/rapid:triage add-smart-link-duplicate-prevention"
+
+AI presents findings one by one:
+
+┌─────────────────────────────────────────────────────────┐
+│ Triage Progress: 1/3 findings | Est. 3 min remaining    │
+└─────────────────────────────────────────────────────────┘
+
+---
+Finding #1: Extract Complex Validation Logic
+
+Severity: 🟡 P2 (IMPORTANT)
+Category: Code Quality
+
+Description:
+The validateSmartLink function has cognitive complexity of 15 (max 10).
+Multiple nested conditions make it hard to understand.
+
+Location: src/lib/validation.ts:42
+
+Proposed Solution:
+Extract validation rules into separate functions:
+- validateUrl(url)
+- validateRelease(releaseId)
+- checkDuplicate(link)
+
+Estimated Effort: Medium (2 hours)
+
+---
+Add to tasks?
+1. yes - add to tasks.md
+2. next - skip this finding
+3. custom - modify before adding
+
+You: "yes"
+
+AI:
+✅ Added to tasks.md: Section 3.1 - Extract validation logic
+
+┌─────────────────────────────────────────────────────────┐
+│ Triage Progress: 2/3 findings | Est. 2 min remaining    │
+│ (1 added, 0 skipped)                                     │
+└─────────────────────────────────────────────────────────┘
+
+---
+Finding #2: Add missing edge case test...
+
+You: "yes"
+
+[... continues for all findings ...]
+
+╔═══════════════════════════════════════════════════════╗
+║         Triage Complete - 3 Findings Reviewed         ║
+╚═══════════════════════════════════════════════════════╝
+
+Added to tasks.md (2 tasks):
+  🟡 Task 3.1: Extract validation logic
+  🔵 Task 3.2: Add concurrent creation test
+
+Skipped (1 finding):
+  Finding #3: Variable naming (cosmetic)
+
+Next: /rapid:resolve-parallel or /rapid:apply to fix tasks
+```
+
+### 5. Resolve Tasks in Parallel (`/rapid:resolve-parallel`) - Optional
+
+```
+You: "/rapid:resolve-parallel add-smart-link-duplicate-prevention"
+
+AI analyzes task dependencies:
+
+Found 2 uncompleted tasks
+
+Analyzing dependencies...
+✓ Task 3.1: Extract validation (independent)
+✓ Task 3.2: Add test (independent)
+
+Execution Plan:
+
+Wave 1 (2 tasks in parallel):
+  - Task 3.1: Extract validation logic (2 hours)
+  - Task 3.2: Add concurrent test (30 min)
+
+Total: 2 hours (vs 2.5 hours sequential)
+Efficiency Gain: 20% faster
+
+Continue? (yes)
+
+You: "yes"
+
+AI:
+Launching Wave 1 (2 tasks in parallel)...
+
+1. Task pr-comment-resolver(task_3_1)
+2. Task pr-comment-resolver(task_3_2)
+
+[Both agents work simultaneously]
+
+✅ Wave 1 Complete (2/2 tasks done)
+
+╔═══════════════════════════════════════════════════════╗
+║         All Tasks Complete - 2/2                      ║
+╚═══════════════════════════════════════════════════════╝
+
+Files changed: 3 files
+Tests: All passing
+
+Updated: rapidspec/changes/add-smart-link-duplicate-prevention/tasks.md
+
+Next: /rapid:commit to commit changes
+```
+
+### 6. Commit Changes (`/rapid:commit`)
 
 ```
 You: "/rapid:commit add-smart-link-duplicate-prevention"
@@ -406,36 +534,7 @@ AI:
 ✓ Committed: abc1234
 ```
 
-### 5. Validate Structure (`/rapid:validate`) - Optional
-
-```
-You: "/rapid:validate add-smart-link-duplicate-prevention"
-
-AI validates structure:
-
-✅ Structure Validation
-  ✓ proposal.md exists with required sections
-  ✓ tasks.md exists with proper format
-  ✓ spec deltas found in specs/smart-links/spec.md
-
-✅ Format Validation
-  ✓ Proposal has Why, What Changes, Impact sections
-  ✓ Tasks use proper checkbox format
-  ✓ Spec deltas use ADDED/MODIFIED/REMOVED headers
-
-✅ Content Validation
-  ✓ File references match actual files
-  ✓ Tasks align with proposal
-  ✓ Spec deltas match proposed changes
-
-Overall: PASSED
-
-Next: /rapid:apply add-smart-link-duplicate-prevention
-```
-
-For comprehensive agent reviews, use `/rapid:review` instead.
-
-### 6. Archive Completion (`/rapid:archive`)
+### 7. Archive Completion (`/rapid:archive`)
 
 ```
 You: "/rapid:archive add-smart-link-duplicate-prevention"
@@ -475,6 +574,11 @@ Done! 🎉
 │    - Present 2-3 approaches with trade-offs                 │
 │    - User selects (1, 2, 3)                                 │
 │                                                              │
+│ 4. Design Review (auto - after selection)                   │
+│    - @agent-database-architect: Schema, migration safety    │
+│    - @agent-nextjs-architecture-expert: Component structure │
+│    - Incorporate design feedback into proposal              │
+│                                                              │
 │ → Files created:                                            │
 │   - proposal.md, tasks.md, investigation.md, research.md    │
 └─────────────────────────────────────────────────────────────┘
@@ -482,13 +586,19 @@ Done! 🎉
 ┌─────────────────────────────────────────────────────────────┐
 │                     /rapid:apply                            │
 ├─────────────────────────────────────────────────────────────┤
-│ Implementation (step-by-step with checkpoints)              │
+│ 1. Read spec files                                           │
+│    - proposal.md, tasks.md, investigation.md                │
 │                                                              │
-│ For each task:                                               │
-│   1. Show what will be done                                 │
-│   2. Wait for "ㄱㄱ" (go) or "wait!" (pause)                 │
-│   3. Implement and show diff                                │
-│   4. Support "잠깐" (wait) to change direction               │
+│ 2. Architecture Validation (auto - before implementation)   │
+│    - @agent-database-architect: Implementation guidance     │
+│    - @agent-nextjs-architecture-expert: Concrete approach   │
+│                                                              │
+│ 3. Implementation (step-by-step with checkpoints)           │
+│    For each task:                                            │
+│      1. Show what will be done                              │
+│      2. Wait for "ㄱㄱ" (go) or "wait!" (pause)              │
+│      3. Implement and show diff                             │
+│      4. Support "잠깐" (wait) to change direction            │
 │                                                              │
 │ After all tasks complete:                                    │
 │   → Shows summary (files changed, tests added)              │
@@ -506,12 +616,41 @@ Done! 🎉
 │                                                              │
 │ Conditional reviews (based on changes):                     │
 │   - @agent-code-reviewer: Quality, types, patterns         │
-│   - @agent-nextjs-architecture-expert: Next.js patterns    │
-│   - @agent-database-architect: Migration safety, indexes   │
+│   - @agent-data-integrity-guardian: Data consistency       │
 │   - @agent-test-automator: Coverage analysis               │
+│   - @agent-performance-oracle: Performance optimization    │
+│                                                              │
+│ Note: Architecture agents run in /rapid:proposal            │
+│       and /rapid:apply (not here)                           │
 │                                                              │
 │ → Review report (Critical/Warning/Info)                     │
-│ → Option to fix warnings before commit                      │
+│ → Suggests /rapid:triage to review findings                 │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                  /rapid:triage (optional)                   │
+├─────────────────────────────────────────────────────────────┤
+│ Review findings one by one:                                  │
+│   1. Present each finding with severity and impact          │
+│   2. User decides: yes/next/custom                          │
+│   3. Accepted findings → Add to tasks.md                    │
+│   4. Skipped findings → Document for later                  │
+│                                                              │
+│ → Findings converted to actionable tasks                    │
+│ → Suggests /rapid:resolve-parallel or /rapid:apply          │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│              /rapid:resolve-parallel (optional)             │
+├─────────────────────────────────────────────────────────────┤
+│ Resolve multiple tasks in parallel:                         │
+│   1. Analyze task dependencies                              │
+│   2. Generate execution plan (Mermaid diagram)              │
+│   3. Execute in waves (parallel within wave)                │
+│   4. Update tasks.md after each wave                        │
+│                                                              │
+│ → Tasks completed 30-50% faster than sequential             │
+│ → Suggests /rapid:commit after completion                   │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -526,22 +665,6 @@ Done! 🎉
 │   6. Create commit with conventional format                 │
 │                                                              │
 │ → Committed to git                                          │
-└─────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────┐
-│                    /rapid:validate (optional)               │
-├─────────────────────────────────────────────────────────────┤
-│ Structure validation (always):                              │
-│   - Required files exist (proposal.md, tasks.md)            │
-│   - Proposal format (sections present)                      │
-│   - Task checkbox syntax                                     │
-│                                                              │
-│ Agent reviews (optional, with --agents flag):               │
-│   - @agent-code-verifier: Verify no imaginary code          │
-│   - @agent-security-auditor: Check security implications    │
-│                                                              │
-│ → Structure validation report                               │
-│ Note: For post-implementation review, use /rapid:review     │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐

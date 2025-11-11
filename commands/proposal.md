@@ -10,7 +10,7 @@ argument-hint: <change-id> [description]
 <!-- RAPIDSPEC:START -->
 # Create RapidSpec Proposal
 
-Transform feature descriptions, bug reports, or improvements into well-structured OpenSpec proposals with automated verification and research.
+Transform feature descriptions, bug reports, or improvements into well-structured RapidSpec proposals with automated verification and research.
 
 ## Feature Description
 
@@ -106,6 +106,73 @@ User may choose option number, say "yes" (go), or "wait" (wait) to reconsider.
 - User says "wait" (wait) or "no" (no) to change direction
 
 **DO NOT proceed to file generation until user confirms their choice.**
+
+### 3.5 Design Review (Before File Generation)
+
+<thinking>
+After user selects option, validate architecture and design decisions.
+Run design-focused agents to catch issues before implementation starts.
+This prevents building with flawed architecture.
+</thinking>
+
+<critical_requirement>
+MUST run design review agents in parallel based on detected changes.
+MUST incorporate design feedback into proposal before scaffolding files.
+Design issues caught now are 10x cheaper to fix than during implementation.
+</critical_requirement>
+
+**Run these agents in parallel based on selected option:**
+
+**If Database changes detected:**
+- Task database-architect(schema_design, migration_plan, selected_option)
+  - Review schema design, indexes, constraints
+  - Validate migration safety and rollback plan
+  - Suggest performance optimizations (denormalization, caching)
+  - Check RLS policies before writing
+  - Confirm index strategy for query patterns
+
+**If Next.js/React changes detected:**
+- Task nextjs-architecture-expert(component_structure, routing, selected_option)
+  - Review Server/Client Component split
+  - Validate routing and data fetching patterns
+  - Check metadata and caching strategy
+  - Suggest layout and page structure
+  - Validate async params/searchParams usage
+
+**Design Review Checklist:**
+
+After agents complete:
+- [ ] Schema design validated (if DB changes)
+- [ ] Migration safety confirmed (if DB changes)
+- [ ] Component architecture approved (if Next.js changes)
+- [ ] Data fetching strategy validated (if Next.js changes)
+- [ ] Design feedback incorporated into proposal
+- [ ] Ready to scaffold files with validated design
+
+**Example Design Review:**
+
+```
+User selected: Option 1 (Client + DB Unique Constraint)
+
+Running design review...
+
+@agent-database-architect:
+✓ Schema design: unique index on (user_id, release_id) - correct
+⚠️ Migration safety: Add CONCURRENTLY for zero downtime
+💡 Performance: Consider partial index if soft-deletes exist
+✓ RLS: Policy design looks good
+
+@agent-nextjs-architecture-expert:
+✓ Server Component for data fetching - correct
+✓ Client Component only for toast interaction - minimal
+⚠️ Consider: Add loading.tsx for better UX
+💡 Suggestion: Use parallel routes for modal if needed
+
+Incorporating feedback...
+✓ Updated migration to use CREATE INDEX CONCURRENTLY
+✓ Added loading.tsx to tasks
+✓ Design validated, ready to scaffold
+```
 
 ### 4. Scaffold with CLI then Fill Templates
 
@@ -225,7 +292,7 @@ Option 1 because: [evidence-based reasoning from agent findings]
 - [ ] Fix any critical issues
 ```
 
-**`specs/<capability>/spec.md`** - OpenSpec deltas:
+**`specs/<capability>/spec.md`** - RapidSpec deltas:
 ```markdown
 ## ADDED Requirements
 ### Requirement: [Feature Name]
@@ -384,7 +451,7 @@ Good: Task framework-docs-researcher(next.js, authentication)
 
 - **Always run agents in parallel** for faster context gathering
 - **Wait for user confirmation** before generating files
-- **Use OpenSpec format** for all proposal files
+- **Use RapidSpec format** for all proposal files
 - **Verify everything** with actual code reads, never assume
 
 <!-- RAPIDSPEC:END -->

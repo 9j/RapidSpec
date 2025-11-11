@@ -11,7 +11,7 @@ argument-hint: <change-id>
 # Archive RapidSpec Change
 
 <command_purpose>
-Archive completed OpenSpec changes and merge spec deltas to canonical specs.
+Archive completed RapidSpec changes and merge spec deltas to canonical specs.
 Move to timestamped archive, validate strictly, close linked Linear issues.
 </command_purpose>
 
@@ -80,7 +80,7 @@ This preserves history while clearing active changes directory.
 <thinking>
 Apply spec deltas from change to canonical specs.
 This updates the source of truth with completed changes.
-Preserve OpenSpec format and structure.
+Preserve RapidSpec format and structure.
 </thinking>
 
 **Delta merge process:**

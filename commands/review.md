@@ -29,7 +29,7 @@ Reviews validate implementation against spec, ensuring security, performance, an
 
 <thinking>
 First, I must understand what was planned and what was actually implemented.
-Read the OpenSpec proposal and tasks, then compare against actual git changes.
+Read the RapidSpec proposal and tasks, then compare against actual git changes.
 This provides context for all subsequent agent reviews.
 </thinking>
 
@@ -105,20 +105,18 @@ HAS_API_CHANGES=$(git diff --name-only | grep -E "api/|app/.*route\.ts")
 Then run in parallel based on detection:
 
 **If database changes** (`HAS_DB_CHANGES`):
-- Task database-architect(migration_files)
 - Task data-integrity-guardian(migration_files)
-- Task supabase-schema-architect(migration_files) [if Supabase detected]
+- [database-architect moved to /rapid:proposal Design Review and /rapid:apply Architecture Validation]
 
 **If component changes** (`HAS_COMPONENT_CHANGES`):
 - Task code-reviewer(component_files)
-- Task nextjs-architecture-expert(component_files) [if Next.js detected]
+- [nextjs-architecture-expert moved to /rapid:proposal Design Review and /rapid:apply Architecture Validation]
 
 **If test changes or new features** (`HAS_TEST_CHANGES` or user-facing):
 - Task test-automator(test_files, change_files)
 
 **If API changes** (`HAS_API_CHANGES`):
 - Task performance-oracle(api_files)
-- Task architecture-strategist(api_files)
 
 **Optional (run if explicitly requested)**:
 - Task git-history-analyzer(change_files) - Historical context
@@ -150,20 +148,16 @@ Then run in parallel based on detection:
 - Code complexity (cognitive <10)
 - Testing coverage
 
-**@agent-nextjs-architecture-expert**: Next.js 16 patterns
-- Server Components used by default
-- Client Components only when needed
-- Async params/searchParams awaited
-- Images use Next.js Image component
-- Data fetching optimized
-- Metadata API usage
+**@agent-data-integrity-guardian**: Data integrity & safety
+- Migration execution safety (non-blocking)
+- Data consistency checks
+- Constraint validation
+- Index coverage for queries
+- No data loss risks
 
-**@agent-database-architect**: Database safety
-- Migration non-blocking
-- Rollback script provided
-- Indexes on foreign keys
-- No N+1 queries
-- RLS policies correct
+**Note:** Architecture agents (@agent-nextjs-architecture-expert, @agent-database-architect)
+now run during /rapid:proposal (Design Review) and /rapid:apply (Architecture Validation)
+to catch design issues before implementation starts.
 
 **@agent-test-automator**: Test coverage
 - E2E tests present (Playwright)

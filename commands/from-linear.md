@@ -11,7 +11,7 @@ argument-hint: <issue-id-or-url>
 # Create Proposal from Linear Issue
 
 <command_purpose>
-Convert Linear issues to OpenSpec proposals with automated research and verification.
+Convert Linear issues to RapidSpec proposals with automated research and verification.
 Fetch issue details, run parallel agents for research, present options, generate files.
 </command_purpose>
 
@@ -47,7 +47,7 @@ Parse requirements and acceptance criteria from issue content.
 
 <thinking>
 Parse Linear issue content to extract requirements and constraints.
-Map to OpenSpec format (Why, What, Impact).
+Map to RapidSpec format (Why, What, Impact).
 </thinking>
 
 **Analysis process:**
@@ -93,7 +93,7 @@ Present pros/cons/cost and wait for user decision.
 ### 5. Generate Proposal Files
 
 <thinking>
-Create OpenSpec files in rapidspec/changes/ directory.
+Create RapidSpec files in rapidspec/changes/ directory.
 Use verified code and research findings from agents.
 </thinking>
 
