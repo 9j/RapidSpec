@@ -14,7 +14,7 @@ Prevent "imaginary code" by verifying all code references against actual files.
 **Automatically triggered:**
 - During `/rapid:proposal` (before suggesting changes)
 - During `/rapid:apply` (before implementing)
-- During `/rapid:validate` (validation check)
+- During `/rapid:review` (validation check)
 
 **Manual trigger:**
 ```

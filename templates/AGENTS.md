@@ -24,8 +24,6 @@ Instructions for AI coding assistants using RapidSpec for spec-driven developmen
 # 5. Archive after deployment
 /rapid:archive [change-id]
 
-# 6. Validate structure anytime
-/rapid:validate [change-id]
 ```
 
 ---
@@ -151,26 +149,6 @@ Archives completed changes after deployment.
 /rapid:archive add-user-authentication
 ```
 
-### `/rapid:validate` - Structure Validation
-
-Validates proposal structure and format.
-
-**What it does:**
-1. Checks required files exist
-2. Validates proposal sections
-3. Checks task format
-4. Validates spec deltas
-
-**Modes:**
-- Normal: Shows warnings
-- `--strict`: Fails on warnings
-
-**Example:**
-```
-/rapid:validate add-user-authentication --strict
-```
-
----
 
 ## Directory Structure
 
@@ -481,7 +459,6 @@ See `agents/` directory for full list and documentation.
 /rapid:review <name>       # Run agent reviews
 /rapid:commit              # Update tasks and commit
 /rapid:archive <name>      # Archive after deployment
-/rapid:validate <name>     # Validate structure
 ```
 
 ---

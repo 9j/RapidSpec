@@ -110,7 +110,7 @@ Agents run automatically during workflow:
 ```
 /rapid:proposal  → code-verifier, best-practices-researcher
 /rapid:apply     → code-verifier, security-auditor (if needed)
-/rapid:validate  → all relevant agents based on changes
+/rapid:review    → all relevant agents based on changes
 Before commit    → code-reviewer, task-updater
 ```
 
@@ -214,13 +214,6 @@ User: "What's the best way to implement OAuth?"
 │ → Ready to commit                                           │
 └─────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────┐
-│                    /rapid:validate                          │
-├─────────────────────────────────────────────────────────────┤
-│ Runs ALL relevant agents based on file changes              │
-│                                                              │
-│ → Comprehensive validation report                           │
-└─────────────────────────────────────────────────────────────┘
 ```
 
 ## Adding Custom Agents

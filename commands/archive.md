@@ -101,7 +101,7 @@ Rollback if validation fails to prevent broken specs.
 
 **Validation:**
    ```bash
-   rapid:validate --strict
+   rapid validate --strict
    ```
    - Ensure no errors in canonical specs
    - If errors found, rollback and fix
@@ -141,7 +141,7 @@ Reading: specs/smart-links/spec.md
 Updated: rapidspec/specs/smart-links/spec.md
 
 Validating...
-Running: rapid:validate --strict
+Running: rapid validate --strict
 ✓ No errors found
 
 Linear integration...
@@ -234,7 +234,7 @@ Good: Merge deltas → Validate strictly → Fix errors
 - Timestamp format matches Supabase migrations: `YYYYMMDDhhmmss`
 - Archive path: `rapidspec/changes/archive/<timestamp>-<change-id>/`
 - Canonical specs: `rapidspec/specs/<capability>/spec.md`
-- Validate command: `rapid:validate --strict`
+- Validate command: `rapid validate --strict`
 - Linear API: Auto-close issues when found in proposal.md
 - User says "yes" (proceed), "wait" (wait) if issues found
 
