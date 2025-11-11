@@ -23,6 +23,12 @@ const RAPIDSPEC_MARKERS = {
 
 // Technology stack configurations
 const TECH_STACKS = {
+  "none": {
+    name: "No specific stack",
+    description: "General-purpose setup without stack-specific agents",
+    agents: [] as string[],
+    includeDatabase: false
+  },
   "nextjs-supabase": {
     name: "Next.js + Supabase",
     description: "Full-stack React with Supabase backend",
@@ -143,13 +149,13 @@ const packageRoot = resolve(__dirname, "..");
 program
   .name("rapid")
   .description("RapidSpec - Spec-driven development for Claude Code")
-  .version("0.3.1");
+  .version("0.4.0");
 
 program
   .command("init [path]")
   .description("Initialize RapidSpec in your project")
   .option("--force", "Overwrite existing files")
-  .option("--stack <stack>", "Technology stack (nextjs-supabase, nextjs-only)")
+  .option("--stack <stack>", "Technology stack (none, nextjs-supabase, nextjs-only)")
   .action(async (targetPath, options) => {
     const cwd = targetPath ? resolve(process.cwd(), targetPath) : process.cwd();
 
@@ -175,16 +181,27 @@ program
     // Technology stack selection
     let selectedStack = options.stack;
     if (!selectedStack) {
-      console.log(chalk.bold("Select your technology stack:"));
-      const stackChoices = Object.entries(TECH_STACKS).map(([key, stack]) => ({
-        name: `${stack.name} - ${stack.description}`,
-        value: key
-      }));
+      console.log(chalk.bold("Select your technology stack (optional):"));
+      const stackChoices = [
+        ...Object.entries(TECH_STACKS).map(([key, stack]) => ({
+          name: `${stack.name} - ${stack.description}`,
+          value: key
+        })),
+        {
+          name: "Skip - Use general-purpose setup",
+          value: "none"
+        }
+      ];
 
       selectedStack = await select({
-        message: "Choose your technology stack:",
+        message: "Choose your technology stack (or skip for general setup):",
         choices: stackChoices
       });
+    }
+
+    // Default to "none" if no stack specified and user skipped selection
+    if (!selectedStack) {
+      selectedStack = "none";
     }
 
     const stackConfig = TECH_STACKS[selectedStack as keyof typeof TECH_STACKS];
@@ -257,6 +274,11 @@ program
 
       // Filter agents based on selected stack
       const agentFiles = allAgentFiles.filter(file => {
+        // For "none" stack, only include general-purpose agents
+        if (selectedStack === "none") {
+          return file.includes("general") || file.includes("code-reviewer") || file.includes("architecture") || file.includes("best-practices");
+        }
+
         // Always include general agents
         if (file.includes("general") || file.includes("code-reviewer") || file.includes("architecture")) {
           return true;
