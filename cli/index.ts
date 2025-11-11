@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import chalk from "chalk";
+import { select } from "@inquirer/prompts";
 import {
   readFileSync,
   existsSync,
@@ -18,6 +19,22 @@ import { fileURLToPath } from "url";
 const RAPIDSPEC_MARKERS = {
   start: "<!-- RAPIDSPEC:START -->",
   end: "<!-- RAPIDSPEC:END -->",
+};
+
+// Technology stack configurations
+const TECH_STACKS = {
+  "nextjs-supabase": {
+    name: "Next.js + Supabase",
+    description: "Full-stack React with Supabase backend",
+    agents: ["nextjs-expert.md", "supabase-expert.md", "database-expert.md"],
+    includeDatabase: true
+  },
+  "nextjs-only": {
+    name: "Next.js Only",
+    description: "Next.js without database",
+    agents: ["nextjs-expert.md"],
+    includeDatabase: false
+  }
 };
 
 // Update file with markers (OpenSpec pattern)
@@ -69,6 +86,34 @@ function updateFileWithMarkers(filePath: string, content: string): void {
   writeFileSync(filePath, existingContent, "utf-8");
 }
 
+// Filter content based on technology stack
+function filterContentByStack(content: string, stackConfig: any): string {
+  if (stackConfig.includeDatabase) {
+    // Include database-related blocks
+    return content;
+  } else {
+    // Remove database-related blocks and agent references
+    let filtered = content;
+
+    // Remove database-specific sections
+    filtered = filtered.replace(/### Database.*?### \w+/gs, (match) => {
+      if (match.includes('Database Migration') || match.includes('Database Schema')) {
+        return '';
+      }
+      return match;
+    });
+
+    // Remove supabase-specific agent calls
+    filtered = filtered.replace(/\b(supabase|database)-expert\b/g, '');
+
+    // Remove database-related task references
+    filtered = filtered.replace(/.*database.*migration.*\n/gi, '');
+    filtered = filtered.replace(/.*supabase.*\n/gi, '');
+
+    return filtered;
+  }
+}
+
 // Root AGENTS.md stub template
 const AGENTS_ROOT_STUB = `# RapidSpec Instructions
 
@@ -98,12 +143,13 @@ const packageRoot = resolve(__dirname, "..");
 program
   .name("rapid")
   .description("RapidSpec - Spec-driven development for Claude Code")
-  .version("0.3.0");
+  .version("0.3.1");
 
 program
   .command("init [path]")
   .description("Initialize RapidSpec in your project")
   .option("--force", "Overwrite existing files")
+  .option("--stack <stack>", "Technology stack (nextjs-supabase, nextjs-only)")
   .action(async (targetPath, options) => {
     const cwd = targetPath ? resolve(process.cwd(), targetPath) : process.cwd();
 
@@ -125,6 +171,30 @@ program
       console.log(chalk.gray("Use --force to overwrite\n"));
       process.exit(1);
     }
+
+    // Technology stack selection
+    let selectedStack = options.stack;
+    if (!selectedStack) {
+      console.log(chalk.bold("Select your technology stack:"));
+      const stackChoices = Object.entries(TECH_STACKS).map(([key, stack]) => ({
+        name: `${stack.name} - ${stack.description}`,
+        value: key
+      }));
+
+      selectedStack = await select({
+        message: "Choose your technology stack:",
+        choices: stackChoices
+      });
+    }
+
+    const stackConfig = TECH_STACKS[selectedStack as keyof typeof TECH_STACKS];
+    if (!stackConfig) {
+      console.log(chalk.red(`✗ Invalid stack: ${selectedStack}`));
+      console.log(chalk.gray("Available stacks:", Object.keys(TECH_STACKS).join(", ")));
+      process.exit(1);
+    }
+
+    console.log(chalk.green(`✓ Selected stack: ${stackConfig.name}\n`));
 
     // Create directory structure
     console.log(chalk.bold("Creating directories:"));
@@ -175,15 +245,26 @@ program
       console.log(chalk.green(`  ✓ rapidspec/AGENTS.md (detailed)`));
     }
 
-    // Copy agents
+    // Copy agents (filtered by stack)
     console.log(chalk.bold("\nCopying agents:"));
     const agentsSrcDir = join(packageRoot, "agents");
     const agentsDestDir = join(cwd, ".claude", "agents");
 
     if (existsSync(agentsSrcDir)) {
-      const agentFiles = readdirSync(agentsSrcDir).filter((f: string) =>
+      const allAgentFiles = readdirSync(agentsSrcDir).filter((f: string) =>
         f.endsWith(".md"),
       );
+
+      // Filter agents based on selected stack
+      const agentFiles = allAgentFiles.filter(file => {
+        // Always include general agents
+        if (file.includes("general") || file.includes("code-reviewer") || file.includes("architecture")) {
+          return true;
+        }
+        // Include stack-specific agents
+        return stackConfig.agents.includes(file);
+      });
+
       for (const file of agentFiles) {
         const srcPath = join(agentsSrcDir, file);
         const destPath = join(agentsDestDir, file);
@@ -195,7 +276,7 @@ program
       console.log(chalk.yellow("  ⚠️  No agents directory found"));
     }
 
-    // Copy commands
+    // Copy commands (filtered by stack)
     console.log(chalk.bold("\nCopying commands:"));
     const commandsSrcDir = join(packageRoot, "commands");
     const commandsDestDir = join(cwd, ".claude", "commands", "rapidspec");
@@ -207,7 +288,12 @@ program
       for (const file of commandFiles) {
         const srcPath = join(commandsSrcDir, file);
         const destPath = join(commandsDestDir, file);
-        copyFileSync(srcPath, destPath);
+
+        // Read command content and filter based on stack
+        let commandContent = readFileSync(srcPath, "utf-8");
+        commandContent = filterContentByStack(commandContent, stackConfig);
+
+        writeFileSync(destPath, commandContent, "utf-8");
         console.log(chalk.green(`  ✓ .claude/commands/rapidspec/${file}`));
       }
       console.log(chalk.gray(`  Copied ${commandFiles.length} command(s)`));
@@ -281,7 +367,7 @@ program
     console.log(chalk.gray("    AGENT_TYPE: cursor"));
 
     // Success message
-    console.log(chalk.green.bold("\n✓ RapidSpec initialized successfully!\n"));
+    console.log(chalk.green.bold(`\n✓ RapidSpec initialized successfully with ${stackConfig.name}!\n`));
 
     console.log(chalk.bold("Next steps:\n"));
     console.log("1. Start using RapidSpec:");
