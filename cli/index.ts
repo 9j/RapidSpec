@@ -11,6 +11,7 @@ import {
 } from "fs";
 import { dirname, join, resolve } from "path";
 import { fileURLToPath } from "url";
+import pkg from '../package.json' with { type: 'json' };
 import { select } from "@inquirer/prompts";
 import chalk from "chalk";
 import { Command } from "commander";
@@ -156,7 +157,7 @@ const packageRoot = resolve(__dirname, "..");
 program
 	.name("rapid")
 	.description("RapidSpec - Spec-driven development for Claude Code")
-	.version("0.4.1");
+	.version(pkg.version);
 
 program
 	.command("init [path]")
