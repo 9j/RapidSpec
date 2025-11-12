@@ -198,7 +198,6 @@ This allows user to test and change direction at any point.
 5. **Implement**: Create/modify files with verified changes
 6. **Update tasks.md**: Mark task as complete by changing `- [ ]` to `- [x]`
 7. **Checkpoint**: "✅ Task 1.1 complete - Test this? (yes to continue)"
-8. **Optional Verification**: Run `Task code-verifier` if complex changes
 
 3. **Handle Direction Changes**
    - If user says "wait", "no", or "stop":
@@ -239,12 +238,8 @@ tasks.md format:
 
 ### 1.2 [Next Step] (Y min) - Checkpoint ⏸
 - [ ] [specific task]
+- [ ] Add E2E test for [feature]
 **Checkpoint:** User can test here
-
-## 2. Validation
-- [ ] @agent-code-verifier
-- [ ] @agent-security-auditor
-- [ ] E2E tests
 ```
 
 **Examples**
