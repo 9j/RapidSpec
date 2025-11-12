@@ -230,9 +230,8 @@ When you already have a Linear issue and want to implement it using RapidSpec:
 AI will:
 1. Fetch Linear issue #123 (title, description, comments)
 2. Parse requirements and acceptance criteria
-3. Run investigation and research (same as `/rapid:proposal`)
-4. Present implementation options
-5. Create proposal.md with Linear issue link
+3. Delegate to `/rapid:proposal` for complete workflow
+4. Generate all proposal files with full research and verification
 
 This is useful for PM-driven workflows where issues are created first, then implemented.
 

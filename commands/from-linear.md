@@ -19,9 +19,9 @@ Fetch issue details, run parallel agents for research, present options, generate
 
 <critical_requirement>
 MUST fetch full Linear issue details before proceeding.
-MUST run standard proposal research with parallel agents.
-MUST present options and wait for user choice.
-NEVER generate files without verification and research.
+MUST analyze requirements and map to RapidSpec format.
+MUST delegate to /rapid:proposal for complete proposal workflow.
+NEVER duplicate proposal logic - use existing workflow.
 </critical_requirement>
 
 ## Main Tasks
@@ -55,65 +55,31 @@ Map to RapidSpec format (Why, What, Impact).
    - Identify acceptance criteria (bullet points, numbered lists)
    - Extract technical constraints from comments
    - Map to RapidSpec format (Why, What, Options)
+   - Prepare feature description for proposal command
 
-### 3. Research & Verify (Parallel Agents)
-
-<thinking>
-Run parallel agents to verify code and research best practices.
-This prevents "imaginary code" and ensures evidence-based proposals.
-</thinking>
-
-<parallel_tasks>
-
-Run these agents in parallel:
-
-**Verification:**
-- Task code-verifier(feature_description, affected_files)
-- Task git-history-analyzer(affected_files)
-
-**Research:**
-- Task best-practices-researcher(feature_description, technology_stack)
-- Task framework-docs-researcher(detected_framework)
-
-</parallel_tasks>
-
-### 4. Present Options
+### 3. Delegate to Proposal Command
 
 <thinking>
-Synthesize agent findings into 2-3 concrete implementation options.
-Present pros/cons/cost and wait for user decision.
+Delegate the complete proposal workflow to /rapid:proposal.
+This ensures consistent proposal generation with full research and verification.
 </thinking>
 
-**Option presentation:**
-   - Show 2-3 implementation approaches
-   - Include pros/cons/cost for each
-   - Mark recommended option with ⭐
-   - Wait for user choice: "1", "2", "yes"
+**Delegation process:**
+   - Execute: `rapid proposal <change-id>`
+   - Pass analyzed requirements as feature description
+   - Let /rapid:proposal handle all research, verification, and file generation
+   - Wait for proposal completion
 
-### 5. Generate Proposal Files
+### 4. Complete
 
 <thinking>
-Create RapidSpec files in rapidspec/changes/ directory.
-Use verified code and research findings from agents.
+Linear to RapidSpec conversion completed successfully.
 </thinking>
 
-**File generation:**
-   - Create `rapidspec/changes/<change-id>/`
-   - Generate `proposal.md` with Linear link
-   - Create `investigation.md`, `research.md`, `tasks.md`
-   - Create spec deltas in `specs/<capability>/spec.md`
-
-### 6. Update Linear Issue
-
-<thinking>
-Link Linear issue back to generated proposal.
-Add label and comment so team can track spec progress.
-</thinking>
-
-**Linear integration:**
-   - Add label: "has-spec"
-   - Add comment with spec link
-   - Update description with proposal link (optional)
+**Final steps:**
+   - Confirm proposal files created in `rapidspec/changes/<change-id>/`
+   - Verify all proposal documents generated (proposal.md, tasks.md, etc.)
+   - Ready for implementation with `/rapid:apply <change-id>`
 
 ## Linear → Spec Mapping
 
@@ -152,55 +118,23 @@ Acceptance criteria:
   2. QR code shown for initial setup
   3. Backup codes generated and downloadable
 
-Generating change-id...
-Suggested: add-two-factor-auth
+Suggested change-id: add-two-factor-auth
 Proceed? (yes or custom name)
 
 User: "yes"
 
 AI:
-Research & verification...
-✓ Read @src/app/settings/page.tsx
-✓ WebSearch: "Supabase 2FA implementation 2025"
-✓ Found: Supabase Auth v2.38+ has built-in 2FA
-
-Options:
-
-### Option 1: Supabase Auth TOTP ⭐
-- Use built-in `supabase.auth.mfa.enroll()`
-- QR code via `data:image` URI
-- Time: 4 hours, Risk: Low
-- Pros: Official support, maintained
-- Cons: Locked to Supabase
-
-### Option 2: Custom with speakeasy
-- Full control, flexible
-- Time: 2 days, Risk: Medium
-- Pros: Portable, customizable
-- Cons: Security maintenance burden
-
-Which? (1 or 2)
-
-User: "1"
-
-AI:
-Creating proposal...
-✓ Created: rapidspec/changes/add-two-factor-auth/
-✓ Files:
-  - proposal.md (linked to Linear #123)
+Delegating to /rapid:proposal...
+✓ Executing: rapid proposal add-two-factor-auth
+✓ Creating proposal with full research and verification...
+✓ Generated proposal files:
+  - proposal.md
   - investigation.md
   - research.md
   - tasks.md
   - specs/auth/spec.md
 
-Updating Linear #123...
-✓ Added label: "has-spec"
-✓ Added comment:
-  "RapidSpec proposal created: rapidspec/changes/add-two-factor-auth/
-   Next: /rapid:apply add-two-factor-auth"
-
-Done!
-Next steps:
+Done! Next steps:
 - Review: rapidspec/changes/add-two-factor-auth/proposal.md
 - Implement: /rapid:apply add-two-factor-auth
 ```
@@ -215,7 +149,7 @@ Fetching Linear issue BUG-456...
 ✓ Description: "Users see 409 errors when refreshing in multiple tabs"
 ✓ Comments: 5 (includes reproduction steps)
 
-Analyzing...
+Analyzing requirements...
 Problem: Token refresh race condition
 Reproduction: Open app in 2 tabs → 409 error
 Expected: Graceful mutex handling
@@ -225,7 +159,10 @@ Proceed? (yes)
 
 User: "yes"
 
-AI researches and presents options...
+AI:
+Delegating to /rapid:proposal...
+✓ Executing: rapid proposal fix-token-refresh-race
+✓ Running complete proposal workflow with research and verification...
 ```
 
 Example 3: Incomplete Issue
@@ -276,23 +213,23 @@ Fix:
 
 **Anti-Patterns**
 
-❌ Don't: Generate proposal without research
+❌ Don't: Duplicate proposal workflow logic
 ```
-Bad: Parse Linear → Generate files immediately
-→ No code verification, no options
+Bad: Implement separate proposal logic in from-linear
+→ Code duplication, maintenance overhead
 ```
 
-✅ Do: Research first, then present options
+✅ Do: Delegate to existing proposal workflow
 ```
-Good: Parse Linear → Research → Options → Generate
+Good: Parse Linear → Delegate to /rapid:proposal
+→ Reuse existing, well-tested proposal workflow
 ```
 
 **Reference**
 - Linear API: Auto-fetch via issue number or URL
 - Change-id: Kebab-case from title (e.g., "add-two-factor-auth")
-- Auto-label: "has-spec"
-- Auto-comment: Link to proposal
+- Delegation: Uses `/rapid:proposal` for complete workflow
 - User says "yes" (go), "wait" (wait), "no" (no)
-- After generation, suggest `/rapid:apply <change-id>`
+- After proposal generation, suggest `/rapid:apply <change-id>`
 
 <!-- RAPIDSPEC:END -->
