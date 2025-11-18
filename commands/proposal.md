@@ -33,6 +33,9 @@ All file references must be verified with Read, Grep, or Git commands.
 
 Run these agents in parallel at the same time:
 
+Repository analysis:
+- Task repo-research-analyst(feature_description)
+
 Investigation agents:
 - Task git-history-analyzer(affected_files)
 - Task pattern-recognition-specialist(affected_files)
@@ -209,7 +212,7 @@ Now populate these scaffolded files in `rapidspec/changes/<change-id>/`:
 ## Code Verification
 - [x] Read actual files: @path/to/file:line
 - [x] Git history checked: [findings from git-history-analyzer]
-- [x] Existing patterns found: [patterns from code-verifier]
+- [x] Existing patterns found: [patterns from pattern-recognition-specialist]
 
 ## What Changes
 
@@ -237,7 +240,7 @@ Option 1 because: [evidence-based reasoning from agent findings]
 
 ## Impact
 - Affected specs: [list]
-- Affected files: [list with line numbers from code-verifier]
+- Affected files: [list with line numbers]
 - Breaking changes: [yes/no, details]
 ```
 
@@ -245,14 +248,17 @@ Option 1 because: [evidence-based reasoning from agent findings]
 ```markdown
 # Investigation: [Change ID]
 
+## Repository Analysis
+[Findings from repo-research-analyst: project structure, conventions, documentation]
+
 ## Current State Analysis
-[Findings from code-verifier agent]
+[Current code state and context]
 
 ## Git History
 [Relevant commits and patterns from git-history-analyzer]
 
 ## Existing Patterns
-[Codebase patterns that inform this change]
+[Codebase patterns from pattern-recognition-specialist]
 ```
 
 **`research.md`** - Best practices and reference repos:
